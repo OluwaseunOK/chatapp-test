@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    hello
+    <div class="test">
+      <h1>Existing Chats</h1>
+      <h3>Topics</h3>
+      <ul id="topicListContainer"></ul>
+    </div>
+
+    <h1>New Chat Topics:</h1>
+    <form class="topicForm" action="/" method="post">
+      <label for="newPoll">Name:</label>
+      <input
+        id="topic"
+        type="text"
+        name="newPoll"
+        placeholder="Please enter a new poll here"
+      />
+      <button class="button" type="submit">Add Chat Topic</button>
+    </form>
+
+    <script>
+      const socket = io("http://localhost:8000");
+      let topicListContainer = document.getElementById("topicListContainer");
+
+      let topicForm = document.querySelector(".topicForm");
+      //let button = document.querySelector(".button");
+      let topicList = [];
+
+      let button = document.querySelector(".button");
+      function removeAllChildNodes(parent) {
+        while (parent.firstChild) {
+          parent.removeChild(parent.firstChild);
+        }
+      }
+
+      topicForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        //console.log("hello");
+        if (!topic.value) {
+          console.log("this cannot be empty");
+        } else {
+          let ttopic = topic.value;
+
+          //console.log(ttopic);
+
+          socket.emit("topic", ttopic);
+          topic.value = "";
+        }
+      });
+
+      socket.on("broadcast", function (message) {
+        topicList.push(message);
+        console.log(topicList);
+        removeAllChildNodes(topicListContainer);
+        for (let [ind, x] of topicList.entries()) {
+          var node = document.createElement("li");
+
+          var a = document.createElement("a");
+          a.textContent = x;
+          a.href = `/chat?topic_id=${ind + 1}`;
+
+          a.className = "linker";
+
+          node.appendChild(a);
+          console.log(node);
+
+          topicListContainer.appendChild(node);
+          console.log(topicListContainer);
+        }
+      });
+
+      // rerenders page on new connection
+
+      socket.on("newConnection", function (message) {
+        topicList = [];
+        topicList = message;
+        console.log(topicList);
+        removeAllChildNodes(topicListContainer);
+        for (let [ind, x] of topicList.entries()) {
+          var node = document.createElement("li");
+
+          var a = document.createElement("a");
+          var hiddenInput = document.createElement("input");
+          hiddenInput.value = ind + 1;
+          hiddenInput.type = "hidden";
+          a.textContent = x.topics;
+          a.href = `/chat/${ind + 1}`;
+          a.className = "linker";
+
+          node.appendChild(a);
+          node.appendChild(hiddenInput);
+          console.log(node);
+
+          topicListContainer.appendChild(node);
+          console.log(topicListContainer);
+        }
+      });
+
+      let gb = [1, 2, 3, 4, 5];
+      for (let [index, val] of gb.entries()) {
+        console.log(index, val);
+      }
+    </script>
+  </body>
+</html>

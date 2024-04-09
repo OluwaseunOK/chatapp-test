@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Poll Overview</title>
+    <!-- <link rel="stylesheet" href="css/styles.css" />-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="topic"></div>
+      <table id="c" class="c">
+        <thead class="header row">
+          <th>Sender</th>
+          <th>Content</th>
+        </thead>
+      </table>
+
+      <br />
+      <br />
+
+      <form action="/chat" method="post" id="addChartForm">
+        <div class="sender">
+          <label for="sender">Sender:</label>
+          <input type="text" , name="sender" placeholder="name" id="sender" />
+        </div>
+        <br />
+        <div class="content">
+          <label for="message">Content:</label>
+          <br />
+          <textarea
+            name="message"
+            id="message"
+            cols="30"
+            rows="10"
+            placeholder="message"
+          ></textarea>
+        </div>
+        <button type="submit" class="add-chat-button">Send</button>
+      </form>
+    </div>
+    <script>
+      // variables declaration
+      const socket = io("http://localhost:8000");
+      let messageRow = document.getElementById("messageRow");
+      let table = document.getElementById("c");
+      let addChatForm = document.getElementById("addChartForm");
+      let sender = document.getElementById("sender");
+      let message = document.getElementById("message");
+
+      // function to empty  children nodes, repopulate manual
+
+      function removeAllChildNodes(parent) {
+        while (parent.firstChild) {
+          parent.removeChild(parent.firstChild);
+        }
+      }
+
+      let messagesList = [];
+
+      // listen on added chat, store name and chat
+
+      addChatForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        let newMessage = {
+          message: message.value,
+          sender: sender.value,
+        };
+
+        //console.log(ttopic);
+
+        socket.emit("message", newMessage, "abc");
+        message.value = "";
+        sender.value = "";
+      });
+
+      // on broadcast
+
+      socket.on("broadcastMessage", function (message) {
+        messagesList.push(message);
+        console.log(messagesList);
+        let trout;
+        removeAllChildNodes(table);
+        for (let x of messagesList) {
+          let tr = document.createElement("tr");
+          var td1 = document.createElement("td");
+          td1.textContent = x.sender;
+          tr.appendChild(td1);
+
+          var td2 = document.createElement("td");
+          td2.textContent = x.message;
+          tr.appendChild(td2);
+          console.log(tr);
+          trout = tr;
+          table.appendChild(trout);
+
+          //console.log(table);
+
+          // node.appendChild(a);
+          //console.log(node);
+
+          //topicListContainer.appendChild(node);
+          //console.log(topicListContainer);
+        }
+
+        //table.appendChild(trout);
+
+        //removeAllChildNodes(messageRow);
+      });
+
+      const aTagClick = document.querySelectorAll("li");
+
+      nodes = Array.prototype.slice.call(aTagClick, 0);
+
+      console.log(nodes);
+
+      nodes.forEach(function (node) {
+        node.addEventListener("click", function (e) {});
+      });
+
+      // add the event listener with a callback function
+      //aTagClick.addEventListener("click", () => {
+      //console.log("link was clicked!");
+      //});
+
+      socket.on("linker", function (message) {
+        messagesList = message;
+        console.log(messagesList);
+        console.log("hurrayyyyyyyyyy");
+        console.log(messagesList.length);
+        let trout;
+        /*removeAllChildNodes(topicListContainer);*/
+        for (let x = 0; x < message.length; x++) {
+          let tr = document.createElement("tr");
+          var td1 = document.createElement("td");
+          td1.textContent = message[x].name;
+          tr.appendChild(td1);
+
+          var td2 = document.createElement("td");
+          td2.textContent = message[x].message;
+          tr.appendChild(td2);
+          console.log(tr);
+          trout = tr;
+
+          table.appendChild(trout);
+
+          console.log(table);
+
+          // node.appendChild(a);
+          //console.log(node);
+
+          //topicListContainer.appendChild(node);
+          //console.log(topicListContainer);
+        }
+        //removeAllChildNodes(messageRow)
+      });
+
+      val = [[topic, message.message, message.sender]];
+
+      var sql = "INSERT INTO chats ( topic_id,name,message) VALUES (?)";
+      connection.query(sql, val, function (err, result) {
+        if (err) throw err;
+      });
+    </script>
+  </body>
+</html>
